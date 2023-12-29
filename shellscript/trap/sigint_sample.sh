@@ -16,4 +16,4 @@ function escape_script()
 echo "Start_$(date +%Y%m%d%H%M%S)"
 wait $(sleep 10)
 echo "Fnished_$(date +%Y%m%d%H%M%S)"
-trap EXIT
+exit 0
