@@ -8,6 +8,8 @@
 ## ディレクトリ構成(カレント1階層のみ)
 ```
 .
+├── CODEOWNERS
+├── README.md
 ├── read
 └── trap
 ```
