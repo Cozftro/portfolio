@@ -5,6 +5,7 @@ set -eu
 
 ### Varibales
 # Readonly
+declare -r SUM_ARGS=$#
 declare -r SCRIPT=${0##*/}
 declare -r SCRIPT_PATH=$(readlink -f ${0})
 declare -r SCRIPT_DIR=${SCRIPT_PATH%/*}
@@ -21,6 +22,8 @@ declare -r HELP="\e[34;40;1mHow To Use\e[m
 - Argument
   -s required
      セット数を指定
+  -h
+     help表示
 
 - e.g.
   ./"${SCRIPT}" -s 2
@@ -44,10 +47,14 @@ function _out_log()
 function _confirm_int()
 {
   local -i _SET_COUNT=$1
-  if [[ ${_SET_COUNT} =~ ^[0-9]+$ ]]; then
+  if [[ ${_SET_COUNT} == 0 ]]; then
+    zsh -c "echo -e \"${INVALID_ARGS}\""
+    exit 1
+  elif [[ ${_SET_COUNT} =~ ^[0-9]+$ ]]; then
     :
   else
     zsh -c "echo -e \"${INVALID_ARGS}\""
+    exit 1
   fi
   return
 }
@@ -71,15 +78,15 @@ function concentrate_task()
     _NOW_WORKING=${j}
     say "ワーキング${_NOW_WORKING}回目"
     osascript -e "display notification \"ワーキング${_NOW_WORKING}回目（${_NOW_CNT}セット）\" with title \"ポモドーロタイマー\""
-    sleep 10
+    sleep 1500
     if [[ ${_NOW_WORKING} -ne 4 ]];then
       say "休憩${_NOW_WORKING}回目"
       osascript -e "display notification \"休憩${_NOW_WORKING}回目（${_NOW_CNT}セット）\" with title \"ポモドーロタイマー\""
-      sleep 5
+      sleep 300
     else
       say "大休憩"
       osascript -e "display notification \"大休憩（${_NOW_CNT}セット）\" with title \"ポモドーロタイマー\""
-      sleep 5
+      sleep 1200
     fi
   done
   return
@@ -90,6 +97,7 @@ function concentrate_task()
 _out_log "script開始"
 
 # 引数チェック
+[[ ${SUM_ARGS} -eq 0 ]] && { zsh -c "echo -e \"${INVALID_ARGS}\"" ; exit 1 ; }
 while getopts 's:h' OPTION ; do
   case $OPTION in
     s)
@@ -98,7 +106,7 @@ while getopts 's:h' OPTION ; do
       ARG_FLAG="true"
       ;;
     h)
-      echo -e "${HELP}"
+      zsh -c "echo -e \"${HELP}\""
       exit 0
       ;;
     \?)
@@ -118,7 +126,7 @@ do
   _out_log "${NOW_SET}セット目Start"
   concentrate_task ${i}
   say "${NOW_SET}セット目End"
-  _out_log "${NOW_SET}セット目Start"
+  _out_log "${NOW_SET}セット目End"
 done
 
 # script完了
